@@ -1,0 +1,9 @@
+Flask
+flask-cors
+Flask-SQLAlchemy
+transformers
+sentence-transformers
+torch
+graphene
+flask-graphql
+graphene-sqlalchemy
