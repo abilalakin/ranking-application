@@ -101,5 +101,11 @@ def graphql_server():
         return jsonify({"errors": [str(e)]}), 500
 
 
+def init_db():
+    with app.app_context():
+        db.create_all()
+
+
 if __name__ == '__main__':
+    init_db() # Initialize db.
     app.run(debug=True)

@@ -52,7 +52,7 @@ const SearchBar: React.FC = () => {
       </div>
 
       {loading && <p>Loading...</p>}
-      {results.length > 0 && (
+      {(results ?? []).length > 0 && (
         <ol>
           {results.map((company, index) => (
             <li key={index}>
