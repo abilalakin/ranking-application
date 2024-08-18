@@ -1,16 +1,19 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_graphql import GraphQLView
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
+from sqlalchemy.ext.declarative import declarative_base
 from ranking.ranker import Ranker, calculate_similarity
+from graphql import GraphQLError
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/graphql": {"origins": "http://localhost:3000"}})
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 ranker = Ranker()
+# SQLAlchemy model base
+Base = declarative_base()
 
 
 class Company(db.Model):
@@ -26,6 +29,7 @@ class Company(db.Model):
 class CompanyType(SQLAlchemyObjectType):
     class Meta:
         model = Company
+        interfaces = (graphene.relay.Node,)
 
 
 class Query(graphene.ObjectType):
@@ -73,15 +77,29 @@ class Mutation(graphene.ObjectType):
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
 
-# GraphQL route
-app.add_url_rule(
-    '/graphql',
-    view_func=GraphQLView.as_view(
-        'graphql',
-        schema=schema,
-        graphiql=True
-    )
-)
+
+@app.route("/graphql", methods=["POST", "GET"])
+def graphql_server():
+    data = request.get_json()
+    query = data.get("query")
+    variables = data.get("variables")
+    context = {}
+
+    try:
+        result = schema.execute(
+            query,
+            variable_values=variables,
+            context_value=context
+        )
+        final_result = {
+            "data": result.data,
+        }
+        return jsonify(final_result), 200
+    except GraphQLError as e:
+        return jsonify({"errors": [str(e)]}), 400
+    except Exception as e:
+        return jsonify({"errors": [str(e)]}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
