@@ -4,25 +4,28 @@ import { gql, useLazyQuery } from '@apollo/client';
 const SEARCH_COMPANIES = gql`
   query SearchCompanies($query: String!) {
     searchCompanies(query: $query) {
-      name
       description
+      name
     }
   }
 `;
 
 const SearchBar: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [search, { loading, data, }] = useLazyQuery(SEARCH_COMPANIES);
-  const [results, setResults] = useState<any[]>([]); // Manage results locally
+  const [searchCompanies, { loading }] = useLazyQuery(SEARCH_COMPANIES);
+
+  const [results, setResults] = useState<any[]>([]);
 
   const handleSearch = () => {
     if (searchTerm.trim() === '') {
       alert('Please enter a search term.');
       return;
     }
-    search({ variables: { query: searchTerm } })
+    searchCompanies({ variables: { query: searchTerm } })
       .then((result) => {
-        setResults(result.data.searchCompanies);
+        if (result.data) {
+          setResults(result.data.searchCompanies);
+        }
       })
       .catch((err) => {
         console.error('Search error:', err);

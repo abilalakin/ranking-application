@@ -15,7 +15,7 @@ const ADD_COMPANY = gql`
 const AddCompany: React.FC = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [addCompany, { data, loading, error }] = useMutation(ADD_COMPANY);
+  const [addCompany, { loading, error }] = useMutation(ADD_COMPANY);
   const [message, setMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
