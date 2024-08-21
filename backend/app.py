@@ -83,13 +83,11 @@ def graphql_server():
     data = request.get_json()
     query = data.get("query")
     variables = data.get("variables")
-    context = {}
 
     try:
         result = schema.execute(
             query,
             variable_values=variables,
-            context_value=context
         )
         final_result = {
             "data": result.data,
@@ -107,5 +105,5 @@ def init_db():
 
 
 if __name__ == '__main__':
-    init_db() # Initialize db.
+    init_db()  # Initialize db.
     app.run(debug=True)
